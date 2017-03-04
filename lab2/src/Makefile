@@ -1,3 +1,11 @@
+#g++ bases.cpp -o build/bases
+#build/bases data/loop.dat
+#g++ files.cpp -o build/files
+#build/files data/loop.dat
+#g++ heaps.cpp -o build/heaps
+#build/heaps data/loop.dat
+
+
 .PHONY: all
 
 all: run
@@ -11,10 +19,10 @@ rerun: clean run
 quick_rerun: clean_build quick_run
 
 quick_run: create_build files.cpp
-	g++ files.cpp -o build/files
-	build/files data/loop.dat
-	g++ heaps.cpp -o build/heaps
-	build/heaps data/loop.dat
+	g++ main.cpp -o build/main
+	build/main data/loop.dat
+
+
 
 mkdirs: create_build
 	mkdir data
