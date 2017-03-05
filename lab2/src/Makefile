@@ -18,9 +18,11 @@ rerun: clean run
 
 quick_rerun: clean_build quick_run
 
-quick_run: create_build files.cpp
+quick_run: create_build sort.cpp
 	g++ main.cpp -o build/main
 	build/main data/loop.dat
+	g++ sort.cpp -o build/sort
+	build/sort data/loop.dat
 
 
 
