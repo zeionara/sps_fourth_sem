@@ -13,11 +13,13 @@ includelib D:\Applications\masm32\lib\user32.lib
   FunctionName db "TestFunction",0
   DllNotFound db "Cannot load library",0
   AppName db "Load Library",0
+  allPerfect db "Whaaaaaaaat",0
   FunctionNotFound db "TestHello function not found",0
 
 .data?
   hLib dd ?
   TestHelloAddr dd ?
+  sega dd ?
 
 .code
   start:
@@ -33,6 +35,7 @@ includelib D:\Applications\masm32\lib\user32.lib
         invoke MessageBox,NULL,addr FunctionNotFound,addr AppName,MB_OK
       .else
         mov TestHelloAddr,eax
+        push offset allPerfect
         call [TestHelloAddr]
       .endif
 

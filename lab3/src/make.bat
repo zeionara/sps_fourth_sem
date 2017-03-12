@@ -1,3 +1,3 @@
-ml /c /coff uselibrary.asm
-link /subsystem:windows uselibrary.obj
-uselibrary
+ml /c /coff firstlab.asm
+link /subsystem:windows firstlab.obj
+firstlab
