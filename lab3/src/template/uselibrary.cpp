@@ -11,6 +11,7 @@ int main(){
   HINSTANCE hDll = LoadLibrary("library.dll");
   VOID (*testfunctionprotype)(LPCTSTR);
   VOID (*sort)(LPDWORD);
+  VOID (*strmask)();
   if (hDll == NULL){
     cout << "Library is not loaded"<< endl;
     return 1;
@@ -35,5 +36,14 @@ int main(){
   DWORD aac = 10;
   sort(&aac);
   cout << "Max element in original array from lab 1 is equal to " << *((LPDWORD)aac) << endl;
+
+  FARPROC seclab = GetProcAddress(hDll,"SecLab");
+  if (seclab == NULL){
+    cout << "Proc wasn't found" << endl;
+    return 1;
+  }
+  cout << "Proc found" << endl;
+  strmask = (VOID(*)())seclab;
+  strmask();
   FreeLibrary(hDll);
 }

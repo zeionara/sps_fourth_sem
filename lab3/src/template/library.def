@@ -1,3 +1,4 @@
 LIBRARY   library
 EXPORTS   TestFunction
 EXPORTS   FirstLab
+EXPORTS   SecLab
