@@ -68,9 +68,9 @@ int main(){
   cout << "Proc found" << endl;
   fpu = (VOID(*)(LPCTSTR, LPCTSTR, LPCTSTR, LPCTSTR, LPVOID))sevlab;
    cout << "kk" << endl;
-  cout << &&rre << endl;
+  //cout << &&rre << endl;
   fpu("1.1", "2.5", "0.2", "0.0001", &&rre);
 
-  rre: cout << "oooo" << endl;
-  FreeLibrary(hDll);
+  cout << "oooo" << endl;
+  rre: FreeLibrary(hDll);
 }

@@ -138,6 +138,7 @@ int main(int argc, char* argv[]){
     generateFile(numberOfIdentifiers,argv[1],3,32);
     hFile = CreateFile(argv[1], GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
     DWORD fileSize = GetFileSize(hFile,&oop);
+
     hMap = CreateFileMapping(hFile, NULL, PAGE_READWRITE, 0, fileSize, NULL);
     hNode = HeapCreate(HEAP_GENERATE_EXCEPTIONS | HEAP_NO_SERIALIZE, NODE_HEAP_ISIZE, 0);
     mappedFile = MapViewOfFile(hMap,FILE_MAP_ALL_ACCESS,0,0,fileSize);

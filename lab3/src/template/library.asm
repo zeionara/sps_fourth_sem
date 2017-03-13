@@ -128,6 +128,10 @@ includelib D:\Applications\masm32\lib\kernel32.lib
   space db " ",0
   counter dd 0
   retaddr dd 0
+  lb7_debug db "Lab7 debug",0
+
+  esp_saved dd 0
+  ebp_saved dd 0
 .code
 
   DllEntry proc hInstDLL:HINSTANCE, reason:DWORD, reserved1:DWORD
@@ -400,9 +404,15 @@ includelib D:\Applications\masm32\lib\kernel32.lib
   SecLab endp
 
   SevLab proc x0str:LPCTSTR, xnstr:LPCTSTR, step:LPCTSTR, acc:LPCTSTR, retta:LPVOID
-  pop retaddr
-  pop eax
-  pop ebx
+  invoke MessageBox,NULL,addr lb7_debug,addr appName,MB_OK
+  ;ret
+  mov esp_saved, esp
+  mov ebp_saved, ebp
+
+
+  ;pop retaddr
+  ;pop eax
+  ;pop ebx
 
   mov eax, x0str
   mov x0s, eax
@@ -481,8 +491,10 @@ includelib D:\Applications\masm32\lib\kernel32.lib
   exitter:
   ;invoke MessageBox,NULL,addr table_head,addr appName,MB_OK
   invoke MessageBox,NULL,addr table_head,addr appName,MB_OK
-  push retta
-  invoke ExitProcess, 0
+
+  ;invoke ExitProcess, 0
+  mov esp, esp_saved
+  mov ebp, ebp_saved
     ret
   SevLab endp
 
