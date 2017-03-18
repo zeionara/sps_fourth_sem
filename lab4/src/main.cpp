@@ -17,6 +17,14 @@ typedef struct _SENTENCE{
 
 #define SENTENCESIZE sizeof(SENTENCE)
 
+int replaceSpaces(char* text, DWORD textSize){
+  for(int i = 0; i < textSize; i++){
+    if (isspace(*(text+i))){
+      *(text+i) = ' ';
+    }
+  }
+}
+
 bool check(const char* array, const char* searched){
     for (DWORD i = 0; i < strlen(searched); i++){
         if (array[i] != searched[i]){
@@ -137,12 +145,12 @@ int sort(const char* fileName, const char* sortTemplate){
   DWORD fileSize = GetFileSize(hFile,NULL);
   HANDLE hMap = CreateFileMapping(hFile, NULL, PAGE_READWRITE, 0, fileSize, NULL);
   char* mappedFile = (char*)MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, fileSize);
+  //replaceSpaces(mappedFile,fileSize);
   char* mappedFileNull = mappedFile;
   HANDLE hSentencesHeap = HeapCreate(HEAP_GENERATE_EXCEPTIONS | HEAP_NO_SERIALIZE, HEAP_SIZE_DEFAULT, 0);
 
   DWORD numOfSentences =  getNumOfSentences(mappedFile, fileSize);
   PSENTENCE sentences = (PSENTENCE)HeapAlloc(hSentencesHeap, HEAP_ZERO_MEMORY, numOfSentences*sizeof(SENTENCE));
-  cout << numOfSentences << endl;
   DWORD index = 0;
   DWORD accumulator = 0;
   for (int i = 0; i < numOfSentences; i++){

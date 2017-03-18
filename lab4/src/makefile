@@ -1,5 +1,10 @@
-.PHONY : all
+п»ї.PHONY : all main
 
-all : main.cpp
+all: launcher
+
+main: main.cpp
 	g++ main.cpp -o main
-	main data/lullaby.txt desc data/lullaby.txt.srtd утро
+
+launcher: launcher.cpp
+	g++ launcher.cpp -o launcher
+	launcher
