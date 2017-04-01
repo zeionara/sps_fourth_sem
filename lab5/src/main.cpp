@@ -102,6 +102,17 @@ DWORD getSentenceLength(char* startOfSentence){
   return i;
 }
 
+void showSentence(PSENTENCE sent){
+  char* endOfSentence = sent->pointer+sent->length;
+  char endOfSentenceChar = *(endOfSentence);
+
+  *(endOfSentence) = 0;
+
+  cout << sent->pointer << endl;
+
+  *(endOfSentence) = endOfSentenceChar;
+}
+
 int Compare(const void* sent1, const void* sent2){
   PSENTENCE firstsentence = (PSENTENCE)sent1;
   PSENTENCE secondsentence = (PSENTENCE)sent2;
@@ -146,16 +157,7 @@ int CompareDesc(const void* sent1, const void* sent2){
   return result;
 }
 
-void showSentence(PSENTENCE sent){
-  char* endOfSentence = sent->pointer+sent->length;
-  char endOfSentenceChar = *(endOfSentence);
 
-  *(endOfSentence) = 0;
-
-  cout << sent->pointer << endl;
-
-  *(endOfSentence) = endOfSentenceChar;
-}
 
 int sort(const char* fileName, const char* sortTemplate, DWORD numOfThreads){
   char sortedFileName[PATH_MAX_LEN];
@@ -184,10 +186,6 @@ int sort(const char* fileName, const char* sortTemplate, DWORD numOfThreads){
   numOfThreadsGlobal = numOfThreads;
   //multithreading
   DWORD numOfSentencesPerThread = numOfSentences / numOfThreads;
-  cout << numOfSentences << endl;
-  cout << numOfSentencesPerThread << endl;
-  cout << numOfSentences*sizeof(SENTENCE) << endl;
-  cout << numOfSentencesPerThread*sizeof(SENTENCE) << endl;
   PSENTENCESUBSET sentenceSubsets = (PSENTENCESUBSET)malloc(numOfThreads * sizeof(SENTENCESUBSET));
   HANDLE* threadHandles = (HANDLE*)malloc(numOfThreads * sizeof(HANDLE));
   threadHandlesGlobal = threadHandles;
@@ -198,37 +196,32 @@ int sort(const char* fileName, const char* sortTemplate, DWORD numOfThreads){
   for (DWORD idOfThread = 0; idOfThread < numOfThreads; idOfThread++){
     sentenceSubsets[idOfThread].id = idOfThread;
     sentenceSubsets[idOfThread].pFirstSentence = sentences + firstSentenceOffset;
-    firstSentenceOffset += numOfSentencesPerThread + 1;
+    firstSentenceOffset += numOfSentencesPerThread;
     if (firstSentenceOffset > numOfSentences) firstSentenceOffset = numOfSentences - 1;
     sentenceSubsets[idOfThread].pLastSentence = sentences + firstSentenceOffset;
     threadHandles[idOfThread] = (HANDLE)_beginthreadex(NULL, 0, threadSort, &sentenceSubsets[idOfThread], CREATE_SUSPENDED, &threadId);
   }
   for (DWORD idOfThread = 0; idOfThread < numOfThreads; idOfThread++) ResumeThread(threadHandles[idOfThread]);
   WaitForSingleObject(threadHandles[0], INFINITE);
-  for (DWORD idOfThread = 0; idOfThread < numOfThreads; idOfThread++) CloseHandle(threadHandles[idOfThread]);
+
+  for (DWORD idOfThread = 0; idOfThread < numOfThreads; idOfThread++){
+    CloseHandle(threadHandles[idOfThread]);
+  }
   free(sentenceSubsets);
   free(threadHandles);
   //multithreading
-
-  if (strcmp(sortTemplate,"asc")==0){
-    //qsort(sentences, numOfSentences, sizeof(SENTENCE), Compare);
-  } else if (strcmp(sortTemplate,"desc")==0){
-    //qsort(sentences, numOfSentences, sizeof(SENTENCE), CompareDesc);
-  }
-
 
   HANDLE hFileS = CreateFile(sortedFileName,GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
   DWORD fileSizeS = GetFileSize(hFileS,NULL);
   HANDLE hMapS = CreateFileMapping(hFileS, NULL, PAGE_READWRITE, 0, fileSizeS, NULL);
   char* mappedFileS = (char*)MapViewOfFile(hMapS, FILE_MAP_ALL_ACCESS, 0, 0, fileSizeS);
   char* mappedFileNullS = mappedFileS;
-
   accumulator = 0;
   for (int i = 0; i < numOfSentences; i++){
+    if (accumulator + (sentences+i)->length > fileSizeS) break;
     strncpy(mappedFileS+accumulator,(sentences+i)->pointer,(sentences+i)->length);
     accumulator += (sentences+i)->length;
   }
-
   UnmapViewOfFile(mappedFileS);
   CloseHandle(hMapS);
   CloseHandle(hFileS);
@@ -249,11 +242,16 @@ unsigned __stdcall threadSort(void* pThArg) {
   LeaveCriticalSection(&criticalSection);*/
 
   PSENTENCESUBSET pSentenceSubset = ((PSENTENCESUBSET)pThArg);
+
+
   DWORD groupSize = 2, numOfSentencesInGroup, idOfThread, twoToI = 1;
   PSENTENCE pFirstSentence;
   idOfThread = pSentenceSubset->id;
   pFirstSentence = pSentenceSubset->pFirstSentence;
+
+
   numOfSentencesInGroup = pSentenceSubset->pLastSentence - pFirstSentence;
+
   EnterCriticalSection(&criticalSection);
 
   if (strcmp(sortTemplateGlobal,"asc")==0){
@@ -263,22 +261,14 @@ unsigned __stdcall threadSort(void* pThArg) {
   }
   LeaveCriticalSection(&criticalSection);
   while ((idOfThread % groupSize) == 0 && numOfSentencesInGroup < numOfSentencesGlobal && (idOfThread + twoToI < numOfThreadsGlobal)) {
-    /* ϡ򥤨��ꀭ馬 ﳱﱲ鱮㡭 �񨢻. */
-
     WaitForSingleObject(threadHandlesGlobal[idOfThread + twoToI], INFINITE);
-
     EnterCriticalSection(&criticalSection);
-    cout << idOfThread << endl;
-    cout << "Thread " << idOfThread + twoToI <<" ended " << endl;
-    MergeArrays(pFirstSentence, pFirstSentence + numOfSentencesInGroup + 1);
-    cout << "Merged" << endl;
+    MergeArrays(pFirstSentence, pFirstSentence + numOfSentencesInGroup);
     LeaveCriticalSection(&criticalSection);
     numOfSentencesInGroup *= 2;
     groupSize *= 2;
     twoToI *= 2;
   }
-  _endthreadex(0);
-
   return 0; /* Ю塢鳼 㼢鸞౥崯𥦤Ό鵠񮮡񥭨鮠*/
 }
 
@@ -309,7 +299,6 @@ static void MergeArrays(PSENTENCE oneSentence, PSENTENCE anotherSentence) {
       pDest++;
     }
   }
-  cout << "oops " << endl;
   if (oneSentenceId >= numOfSentences) memcpy(pDest, anotherSentence, SENTENCESIZE * (numOfSentences - anotherSentenceId));
   else memcpy(pDest, oneSentence, SENTENCESIZE * (numOfSentences - oneSentenceId));
   memcpy(p1Hold, pDestHold, 2 * numOfSentences * SENTENCESIZE);
@@ -351,6 +340,6 @@ int main(int argc, char* argv[]){
     cout << "Usage : main name_of_file_for_sorting template_for_sorting name_of_file_for_searching str_for_searching" << endl;
     return 1;
   }
-  sort(argv[1],argv[2],16);
+  sort(argv[1],argv[2],4);
   search(argv[3],argv[4]);
 }

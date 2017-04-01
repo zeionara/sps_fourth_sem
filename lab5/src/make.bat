@@ -1,2 +1,2 @@
 cl /EHcs main.cpp
-main data/lullaby.txt asc data/lullaby.txt.srtd утро
+main data/lullaby.txt asc data/lullaby.txt.srtd пїЅпїЅпїЅпїЅ
