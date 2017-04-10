@@ -47,6 +47,7 @@ int writeUser(HANDLE fileMutex, const char* fileName, string login, string passw
   ofstream fout(fileName, ios_base::app);
   fout <<"$"<<login<<"/"<<password;
   fout.close();
+  Sleep(15000);
   ReleaseMutex(fileMutex);
   return 0;
 }
@@ -139,9 +140,12 @@ int passToGame(int championship){
 }
 
 int checkUser(HANDLE fileMutex, const char* fileName, string login, string password){
+
   string rLogin;
   string rPassword;
+  cout << "Waiting for acessing data file ... " << endl;
   DWORD dwWaitResult = WaitForSingleObject(fileMutex,INFINITE);
+  cout << "Data file acessed " << endl;
   ifstream fin(fileName);
   int stop = 2;
   int del = 1;
@@ -227,6 +231,7 @@ unsigned __stdcall reShuffleDeck(void* pThArg) {
     }
     EnterCriticalSection(&criticalSection);
     shuffleDeck(deck,*sizePtr);
+    Sleep(5000);
     LeaveCriticalSection(&criticalSection);
     Sleep(1000);
   }
@@ -260,6 +265,7 @@ int passToCards(){
       m = rand() % deckSize;
     } while (m==n);
     cout << "I select " << m << endl;
+    cout << "Waiting for shuffler ..." << endl;
     EnterCriticalSection(&criticalSection);
     num = deck[n];
     computerNum = deck[m];
