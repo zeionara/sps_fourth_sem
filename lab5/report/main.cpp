@@ -53,7 +53,7 @@ unsigned __stdcall mergesort(void* threadArg) {
     hEvents[0] = CreateEvent(NULL, TRUE, FALSE, NULL);
     hEvents[1] = CreateEvent(NULL, TRUE, FALSE, NULL);
     EnterCriticalSection(&criticalSection);
-    showThreadInfo(*threadInfo);
+    //showThreadInfo(*threadInfo);
     LeaveCriticalSection(&criticalSection);
     int ridge = ((threadInfo->low)+(threadInfo->high))/2;
     ThreadInfo firstSubThreadInfo;
@@ -124,13 +124,7 @@ unsigned __stdcall mergesort(void* threadArg) {
 
   }
 
-  if (threadInfo->hFinishEvent != INVALID_HANDLE_VALUE) {
-    EnterCriticalSection(&criticalSection);
-    cout << "Set Event for ";
-    showThreadInfo(*threadInfo);
-    LeaveCriticalSection(&criticalSection);
-    SetEvent(threadInfo->hFinishEvent);
-  }
+  if (threadInfo->hFinishEvent != INVALID_HANDLE_VALUE) SetEvent(threadInfo->hFinishEvent);
   return 0;
 }
 
@@ -140,8 +134,8 @@ void main(int argc, char* argv[])
   DWORD dwWaitResult;
   HANDLE fileMutex = getFileMutex(argv[1]);
 
-  //while (true){
-  //dwWaitResult = WaitForSingleObject(fileMutex,INFINITE);
+  while (true){
+  dwWaitResult = WaitForSingleObject(fileMutex,INFINITE);
   ifstream identifiers(argv[1]);
 
   if (!identifiers){
@@ -211,8 +205,8 @@ void main(int argc, char* argv[])
   ofstream ofs (argv[1], std::ofstream::out);
   for(int i=0; i<numOfElements; i++) ofs<<threadInfo.a[i]<<"\n";
   ofs.close();
-  //cout << "Releasing mutex" << endl;
-  //ReleaseMutex(fileMutex);
-  //cout << "Mutex released" << endl;
-//}
+  cout << "Releasing mutex" << endl;
+  ReleaseMutex(fileMutex);
+  cout << "Mutex released" << endl;
+}
 }
